@@ -1,0 +1,4 @@
+pandas
+eventregistry-python
+python-dotenv
+tqdm
