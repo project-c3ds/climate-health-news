@@ -1,7 +1,6 @@
 from newsapi_batch import ArticleCollector
 from utils import load_sources, load_keywords, filter_sources_by_languages
 from constants import keywords_climate_eng_reduced, concepts_climate
-import pickle
 import pandas as pd
 # from eventregistry import *
 # from dotenv import load_dotenv
@@ -12,7 +11,6 @@ import pandas as pd
 # er.getConceptUri("climate justice")
 
 sources = load_sources()
-
 
 # Language codes from terminal output mapped to countries
 # target_languages = ['lav', 'mkd', 'ell', 'sqi', 'fin', 'ces', 'slk', 'srp', 'lit', 'bul', 'swe', 'isl', 'ukr']
@@ -74,65 +72,136 @@ for lang, keywords in available_keywords.items():
 articles = all_articles
 stats = all_stats
 
-# Create filename with ISO codes
-iso_codes_str = '_'.join(target_languages)
-filename = f'data/articles_{iso_codes_str}.pkl'
+# Re-run for select sources
+sources_to_rerun = sources[sources['rerun'] == 'Yes']
+target_languages = sources_to_rerun['dominant_language'].unique()
 
-# Save articles to pickle file for later analysis
-with open(filename, 'wb') as f:
-    pickle.dump(articles, f)
+# Get languages that have keyword translations
+articles, stats = collector.collect_batch(
+    sources=sources_to_rerun['source_uri'].tolist(),
+    date_start='2023-01-01',
+    date_end='2025-09-01', 
+    concepts=concepts_climate,
+    download_images=False,
+    max_items=500000
+)
 
-print(f"\nSaved {len(articles)} articles to {filename}")
+# all_articles = articles
+# all_stats = stats
+sources_dict = sources_to_rerun.to_dict(orient='records')
 
+all_articles = []
+all_stats = []
 
-# Track which keywords were found in each article
-article_keywords = []
+for source in sources_dict[1:]:
+    print(f"\nCollecting articles for source: {source['source_uri']}")
+    keywords = load_keywords(source['dominant_language'])
+    articles, stats = collector.collect_batch(
+        sources=[source['source_uri']],
+        keywords=keywords,
+        date_start='2023-01-01', 
+        date_end='2025-09-01',
+        lang=source['dominant_language'],
+        exclude_concepts=concepts_climate,
+        download_images=False,
+        max_items=500000
+    )
+    all_articles.extend(articles)
+    all_stats.append(stats)
+    print(f"Collected {len(articles)} articles for {source['source_uri']}")
 
-for article in articles:
-    # Get the article text content
-    text = article.get('body', '').lower() + ' ' + article.get('title', '').lower()
-    
-    # Find which keywords appear in this article
-    found_keywords = []
-    for keyword in keywords_climate_eng_reduced:
-        if keyword.lower() in text:
-            found_keywords.append(keyword)
-            
-    # Store the keywords found for this article
-    article_keywords.append({
-        'title': article.get('title'),
-        'keywords_found': found_keywords,
-        'num_keywords': len(found_keywords),
-        'source_uri': article.get('source_uri'),
-        'text': text
-    })
+articles = all_articles
+stats = all_stats
 
-print(f"\nAnalyzed keyword matches across {len(articles)} articles")
-print(f"Average keywords per article: {sum(k['num_keywords'] for k in article_keywords) / len(articles):.1f}")
-
-for article in article_keywords:
-    print(f"Article: {article['title']}")
-    print(f"Keywords found: {article['keywords_found']}")
-    print(f"Number of keywords: {article['num_keywords']}")
-    print(f"Source URI: {article['source_uri']}")
-    print("-" * 100)
-
+# Collect re-run jsons and save
 import glob
 import json
-import pandas as pd
 
 files = glob.glob('data/articles/*.json')
-file = files[0]
-with open(file, 'r') as f:
-    articles = json.load(f)
-
-lang_codes = []
+articles = []
 for file in files:
-    with open(file, 'r') as f:
-        articles = json.load(f)
-        lang_codes.append(articles['lang'])
-        
-counts = pd.DataFrame(lang_codes, columns=['lang']).value_counts()
+    with open(file, 'r', encoding='utf-8') as f:
+        article = json.load(f)
+        articles.append(article)
 
+print(f"Collected {len(articles)} articles")
 
+# Write jsonl file
+with open('data/lancet_european_articles_rerun.jsonl', 'w', encoding='utf-8') as f:
+    for article in articles:
+        f.write(json.dumps(article, ensure_ascii=False) + '\n')
 
+print("Articles saved successfully!")
+
+# Rerun for Cyprus sources
+cyprus_sources = sources[sources['country_name'] == 'Cyprus']
+target_languages = cyprus_sources['dominant_language'].unique().tolist()
+
+# Get languages that have keyword translations
+available_keywords = {}
+for lang in target_languages:
+    keywords = load_keywords(lang)
+    if keywords:  # Only keep languages that return keywords
+        available_keywords[lang] = keywords
+
+# Get languages that have keyword translations
+collector = ArticleCollector()
+articles, stats = collector.collect_batch(
+    sources=cyprus_sources['source_uri'].tolist(),
+    date_start='2023-01-01',
+    date_end='2025-09-01', 
+    concepts=concepts_climate,
+    download_images=False,
+    max_items=500000
+)
+
+sources_dict = cyprus_sources.to_dict(orient='records')
+
+all_articles = []
+all_stats = []
+
+for source in sources_dict:
+    print(f"\nCollecting articles for source: {source['source_uri']}")
+    keywords = load_keywords(source['dominant_language'])
+    articles, stats = collector.collect_batch(
+        sources=[source['source_uri']],
+        keywords=keywords,
+        date_start='2023-01-01', 
+        date_end='2025-09-01',
+        lang=source['dominant_language'],
+        exclude_concepts=concepts_climate,
+        download_images=False,
+        max_items=500000
+    )
+    all_articles.extend(articles)
+    all_stats.append(stats)
+    print(f"Collected {len(articles)} articles for {source['source_uri']}")
+
+articles = all_articles
+stats = all_stats
+
+# Collect Cyprus re-run jsons and save
+import glob
+import json
+
+files = glob.glob('data/articles/*.json')
+articles = []
+for file in files:
+    with open(file, 'r', encoding='utf-8') as f:
+        article = json.load(f)
+        articles.append(article)
+
+print(f"Collected {len(articles)} articles")
+
+# Write jsonl file
+with open('data/lancet_european_articles_cyprus.jsonl', 'w', encoding='utf-8') as f:
+    for article in articles:
+        f.write(json.dumps(article, ensure_ascii=False) + '\n')
+
+print("Articles saved successfully!")
+
+for concept in concepts_climate:
+    print(concept)
+
+for keyword in load_keywords('eng'):
+    print(keyword)

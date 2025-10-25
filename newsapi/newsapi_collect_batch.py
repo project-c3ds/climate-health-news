@@ -5,12 +5,11 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 import requests
-from utils import load_sources, upload_article_image_to_spaces, save_article_as_json
+from utils import load_sources, save_article_as_json
 
 # Load environment variables
 load_dotenv()
 PLATFORM = 'newsapi'
-IMAGES_DIR = os.getenv('IMAGES_DIR')
 
 
 class ArticleCollector:
@@ -104,16 +103,34 @@ class ArticleCollector:
         
         # Add concepts if available
         if concepts:
-            concept_uris = [self.er.getConceptUri(concept) for concept in concepts]
+            print(f"Looking up URIs for {len(concepts)} concepts...")
+            concept_uris = []
+            for i, concept in enumerate(concepts):
+                try:
+                    uri = self.er.getConceptUri(concept)
+                    concept_uris.append(uri)
+                    if (i + 1) % 5 == 0:
+                        print(f"  Processed {i + 1}/{len(concepts)} concepts")
+                except Exception as e:
+                    print(f"  WARNING: Failed to get URI for concept '{concept}': {e}")
             query_params['conceptUri'] = QueryItems.OR(concept_uris)
-            print(f"Using concepts: {concepts[:100]}..." if len(concepts) > 100 else f"Using concepts: {concepts}")
+            print(f"Using {len(concept_uris)} concepts: {concepts[:100]}..." if len(concepts) > 100 else f"Using {len(concept_uris)} concepts: {concepts}")
         
         # Add excluded concepts if available
         if exclude_concepts:
-            exclude_concept_uris = [self.er.getConceptUri(concept) for concept in exclude_concepts]
+            print(f"Looking up URIs for {len(exclude_concepts)} excluded concepts...")
+            exclude_concept_uris = []
+            for i, concept in enumerate(exclude_concepts):
+                try:
+                    uri = self.er.getConceptUri(concept)
+                    exclude_concept_uris.append(uri)
+                    if (i + 1) % 5 == 0:
+                        print(f"  Processed {i + 1}/{len(exclude_concepts)} excluded concepts")
+                except Exception as e:
+                    print(f"  WARNING: Failed to get URI for excluded concept '{concept}': {e}")
             # For ignoring concepts, use OR to exclude any matching concept
             query_params['ignoreConceptUri'] = QueryItems.OR(exclude_concept_uris)
-            print(f"Excluding concepts: {exclude_concepts[:100]}..." if len(exclude_concepts) > 100 else f"Excluding concepts: {exclude_concepts}")
+            print(f"Excluding {len(exclude_concept_uris)} concepts: {exclude_concepts[:100]}..." if len(exclude_concepts) > 100 else f"Excluding {len(exclude_concept_uris)} concepts: {exclude_concepts}")
         
         return query_params
     
@@ -187,8 +204,7 @@ class ArticleCollector:
                      exclude_keywords: list = None,
                      exclude_concepts: list = None,
                      lang: str = None,
-                     max_items: int = 10000,
-                     download_images: bool = True) -> Tuple[List[Dict], Dict]:
+                     max_items: int = 10000) -> Tuple[List[Dict], Dict]:
         """
         Collect news articles from EventRegistry for a specific date range.
         
@@ -213,8 +229,6 @@ class ArticleCollector:
                 If None, no language filtering is applied.
             max_items (int):
                 Maximum number of articles to retrieve (default: 10000).
-            download_images (bool):
-                Whether to download article images (default: True).
         
         Returns:
             content (list of dict):
@@ -255,12 +269,6 @@ class ArticleCollector:
                     # Add date_time object to article
                     if 'dateTime' in article:
                         article['date_time'] = datetime.datetime.strptime(article['dateTime'], '%Y-%m-%dT%H:%M:%SZ')
-                    
-                    if download_images:
-                        image_url = upload_article_image_to_spaces(article, self.platform)
-                        article['image_url'] = image_url
-                    else:
-                        article['image_url'] = None
                     
                     # Save individual article as JSON file
                     json_file_path = save_article_as_json(article)

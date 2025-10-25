@@ -4,8 +4,9 @@ python-dotenv
 tqdm
 google-generativeai
 boto3
-url-normalize
 requests
 rank-bm25
 openai
 pydantic
+geopandas
+matplotlib

@@ -2,9 +2,8 @@
 import os
 import json
 import requests
-from url_normalize import url_normalize
 import pandas as pd
-from digitalocean_spaces import DigitalOceanSpaces
+
 
 def flatten(list_of_lists):
     '''
@@ -160,82 +159,6 @@ def download_image(url, save_path, timeout=10):
     
     return success
 
-def upload_article_image_to_spaces(article: dict, platform: str):
-    '''
-    Download an article image from a URL and upload it to DigitalOcean Spaces.
-
-    Args:
-        article (dict): NewsAPI article response
-        platform (str): Platform name
-
-    Returns:
-        str: Public URL of the uploaded image, None if failed
-    '''
-    if ('image' in article.keys()) and (article['image'] != None):
-        try:
-            # Initialize DigitalOcean Spaces client
-            spaces = DigitalOceanSpaces()
-            
-            # Download image to memory
-            response = requests.get(article['image'], timeout=10)
-            if response.status_code == 200:
-                # Create filename
-                fname = f'{article["uri"]}.jpg'
-                
-                # Create temporary file
-                temp_path = f'/tmp/{fname}'
-                with open(temp_path, 'wb') as file:
-                    file.write(response.content)
-                
-                # Upload to spaces
-                remote_folder = f'lancet/{platform}'
-                print(f"📤 Uploading {fname} to {remote_folder}...")
-                if spaces.upload_file(temp_path, remote_folder, fname):
-                    # Clean up temp file
-                    os.remove(temp_path)
-                    # Return public URL
-                    public_url = f"{spaces.endpoint_url}/{remote_folder}/{fname}"
-                    print(f"✅ Upload successful: {public_url}")
-                    return public_url
-                else:
-                    # Clean up temp file on failure
-                    print(f"❌ Upload failed for {fname}")
-                    if os.path.exists(temp_path):
-                        os.remove(temp_path)
-                    return None
-            else:
-                print(f"Failed to download image from {article['image']}")
-                return None
-        except Exception as e:
-            print(f"Error uploading image to spaces: {e}")
-            return None
-    return None
-
-def download_article_image(article: dict, images_dir: str, platform: str):
-    '''
-    Download an article image from a URL and save it to a specified path.
-
-    Args:
-        article (dict): NewsAPI article response
-        images_dir (str): Directory to save the image
-        platform (str): Platform name
-
-    Returns:
-        str: Filename of the image
-    '''
-    if ('image' in article.keys()) and (article['image'] != None):
-        # Create directory if it doesn't exist
-        platform_dir = f'{images_dir}/{platform}'
-        os.makedirs(platform_dir, exist_ok=True)
-        
-        fname = f'{article["uri"]}.jpg'
-        # If the image download is successful, add the filename to the list
-        if download_image(article['image'], f'{platform_dir}/{fname}'):
-            return fname
-        else:
-            return None
-    return None
-
 
 def save_article_as_json(article: dict, articles_dir: str = 'data/articles') -> str:
     '''
@@ -273,3 +196,13 @@ def save_article_as_json(article: dict, articles_dir: str = 'data/articles') -> 
     except Exception as e:
         print(f"Error saving article to JSON: {e}")
         return None
+
+
+def get_eea38_plus_uk_countries():
+    """
+    Load the list of EEA38 plus UK countries from constants.
+    
+    Returns:
+        list: List of country names in the EEA38 plus UK region
+    """
+    return ["Albania", "Austria", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Malta", "Moldova", "Montenegro", "Netherlands", "Norway", "Poland", "Portugal", "Romania", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Turkey", "Ukraine", "United Kingdom"]

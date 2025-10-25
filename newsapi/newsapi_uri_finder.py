@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from eventregistry import EventRegistry, QueryArticlesIter
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from constants import EEA38_PLUS_UK_COUNTRIES
+from utils import get_eea38_plus_uk_countries
+
+EEA38_PLUS_UK_COUNTRIES = get_eea38_plus_uk_countries()
 
 load_dotenv()
 API_KEY = os.getenv('NEWSAPI_KEY')
@@ -36,7 +38,7 @@ def fetch_articles(website_name, max_articles=50):
         query = QueryArticlesIter(sourceUri=source_uri)
         articles = []
         
-        for article in query.execQuery(er, sortBy="date", maxItems=max_articles):
+        for article in query.execQuery(er, sortBy="date", maxItems=max_articles, dataType=['news', 'blog']):
             articles.append(article)
         
         status = 'success' if len(articles) == max_articles else 'partial'
