@@ -13,7 +13,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from visualize_article_map import load_shapefile, df_country
-from analysis.plot_time_series import plot_combined_maps_and_timeseries, df_grouped
+from plot_time_series import plot_combined_maps_and_timeseries, df_grouped
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":

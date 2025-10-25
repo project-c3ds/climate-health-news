@@ -4,11 +4,16 @@ This script queries the API without any keyword or concept filters to get the to
 """
 
 import os
+import sys
 import json
 import pandas as pd
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from newsapi_batch import ArticleCollector
+
+# Add parent directory to path to import utils
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+from newsapi_collect_batch import ArticleCollector
 from utils import load_sources
 
 def generate_month_ranges(start_date: str, end_date: str):

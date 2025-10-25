@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-df = pd.read_parquet('data/database/lancet_europe_health_subset_with_dummies.parquet')
+df = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet')
 
 # Parse types column if it's stored as string
 print("Checking types column format...")
@@ -34,7 +34,7 @@ print("="*60)
 
 # Ensure output directory exists
 import os
-os.makedirs('analysis/images', exist_ok=True)
+os.makedirs('plots/images', exist_ok=True)
 
 fig_types, ax_types = plt.subplots(figsize=(10, 8))
 
@@ -60,8 +60,8 @@ ax_types.spines['bottom'].set_linewidth(1.5)
 ax_types.grid(axis='x', alpha=0.3, linestyle='--', linewidth=0.8)
 
 plt.tight_layout()
-plt.savefig('analysis/images/inequality_types_barchart.png', dpi=300, bbox_inches='tight', facecolor='white')
-print("\nInequality types bar chart saved to 'analysis/images/inequality_types_barchart.png'")
+plt.savefig('plots/images/figure4.png', dpi=300, bbox_inches='tight', facecolor='white')
+print("\nInequality types bar chart saved to 'plots/images/figure4.png'")
 plt.close()
 
 # Create monthly master file
@@ -89,9 +89,7 @@ monthly_master['inequality_percentage'] = (monthly_master['inequality_articles']
 # Convert year_month to timestamp for plotting
 monthly_master['date'] = monthly_master['year_month'].dt.to_timestamp()
 
-# Save the monthly master file
-monthly_master.to_csv('analysis/monthly_inequality_master.csv', index=False)
-print("\nMonthly master file saved to 'analysis/monthly_inequality_master.csv'")
+# Monthly master file created (not saved to disk)
 
 # Create attractive standalone time series plot
 print("\n" + "="*60)
@@ -174,8 +172,8 @@ def create_inequality_timeseries(monthly_data, figsize=(14, 7)):
 
 # Create and save the time series plot
 fig_ts, ax_ts = create_inequality_timeseries(monthly_master)
-plt.savefig('analysis/images/inequality_timeseries.png', dpi=300, bbox_inches='tight', facecolor='white')
-print("\nInequality time series plot saved to 'analysis/images/inequality_timeseries.png'")
+plt.savefig('plots/images/figure3.png', dpi=300, bbox_inches='tight', facecolor='white')
+print("\nInequality time series plot saved to 'plots/images/figure3.png'")
 plt.close()
 
 # ============================================================================

@@ -39,9 +39,9 @@ def create_urban_rural_barchart(figsize=(10, 6)):
     # Load raw datasets to get urban_rural_framing column with all categories
     print("\nLoading datasets...")
     # Load only the column we need to save memory
-    df_climate = pd.read_parquet('data/database/lancet_europe_dataset_with_dummies.parquet', 
+    df_climate = pd.read_parquet('data/articles/lancet_europe_dataset_with_dummies.parquet', 
                                   columns=['urban_rural_framing'])
-    df_health = pd.read_parquet('data/database/lancet_europe_health_subset_with_dummies.parquet', 
+    df_health = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet', 
                                  columns=['urban_rural_framing'])
     
     print(f"Climate articles total: {len(df_climate)}")
@@ -129,8 +129,8 @@ def create_urban_rural_barchart(figsize=(10, 6)):
     plt.tight_layout()
     
     # Save figure
-    os.makedirs('data/images', exist_ok=True)
-    output_file = 'data/images/urban_rural_barchart.png'
+    os.makedirs('plots/images', exist_ok=True)
+    output_file = 'plots/images/figure2_alt.png'
     plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"\nBar chart saved to: {output_file}")
     
@@ -158,9 +158,9 @@ def create_urban_rural_barchart_no_health_vs_health(figsize=(10, 6)):
     # Load raw datasets
     print("\nLoading datasets...")
     # Load climate dataset with both urban_rural_framing and health columns
-    df_climate_all = pd.read_parquet('data/database/lancet_europe_dataset_with_dummies.parquet', 
+    df_climate_all = pd.read_parquet('data/articles/lancet_europe_dataset_with_dummies.parquet', 
                                       columns=['urban_rural_framing', 'health'])
-    df_health = pd.read_parquet('data/database/lancet_europe_health_subset_with_dummies.parquet', 
+    df_health = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet', 
                                  columns=['urban_rural_framing'])
     
     # Filter climate articles to get only those WITHOUT health (health != 1)
@@ -253,8 +253,8 @@ def create_urban_rural_barchart_no_health_vs_health(figsize=(10, 6)):
     plt.tight_layout()
     
     # Save figure
-    os.makedirs('data/images', exist_ok=True)
-    output_file = 'data/images/urban_rural_barchart_no_health_vs_health.png'
+    os.makedirs('plots/images', exist_ok=True)
+    output_file = 'plots/images/figure2.png'
     plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"\nBar chart saved to: {output_file}")
     
@@ -282,9 +282,9 @@ def test_urban_rural_proportions():
     
     # Load datasets
     print("\nLoading datasets...")
-    df_climate_all = pd.read_parquet('data/database/lancet_europe_dataset_with_dummies.parquet', 
+    df_climate_all = pd.read_parquet('data/articles/lancet_europe_dataset_with_dummies.parquet', 
                                       columns=['urban_rural_framing', 'health'])
-    df_health = pd.read_parquet('data/database/lancet_europe_health_subset_with_dummies.parquet', 
+    df_health = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet', 
                                  columns=['urban_rural_framing'])
     
     # Filter to get climate articles without health
@@ -433,11 +433,7 @@ def test_urban_rural_proportions():
 
 
 if __name__ == "__main__":
-    # Create both visualizations
-    fig1, ax1 = create_urban_rural_barchart()
-    
-    print("\n")
-    
+    # Create main visualization (no health vs health comparison)
     fig2, ax2 = create_urban_rural_barchart_no_health_vs_health()
     
     print("\n")

@@ -5,7 +5,7 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 # Start with health, urban, and rural
-df = pd.read_parquet('data/database/lancet_europe_dataset_with_dummies.parquet')
+df = pd.read_parquet('data/articles/lancet_europe_dataset_with_dummies.parquet')
 
 df_predictions = df[['uri', 'health', 'urban_rural_framing']]
 
@@ -204,7 +204,7 @@ urban_rural_metrics = print_multilabel_performance(
 # Examine validation of inquality 
 df_inequality = pd.read_csv('data/samples/lancet_validation_inequality.csv')
 
-df_predictions = pd.read_parquet('data/database/lancet_europe_health_subset_with_dummies.parquet')[['uri', 'inequality']]
+df_predictions = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet')[['uri', 'inequality']]
 
 df_inequality_combined = pd.merge(df_inequality, df_predictions, on='uri', how='left')
 

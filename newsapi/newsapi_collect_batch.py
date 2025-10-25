@@ -4,7 +4,6 @@ from typing import Optional, Union, Dict, List, Tuple
 import pandas as pd
 import os
 from dotenv import load_dotenv
-import requests
 from utils import load_sources, save_article_as_json
 
 # Load environment variables

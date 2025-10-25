@@ -209,7 +209,7 @@ def classify_by_language(
 
 #if __name__ == "__main__":
 # Load data
-df = pd.read_parquet('data/database/lancet_europe_dataset_with_dummies.parquet')
+df = pd.read_parquet('data/articles/lancet_europe_dataset_with_dummies.parquet')
 
 # Classify with language-specific keywords
 df = classify_by_language(
@@ -274,7 +274,7 @@ else:
     print("\nNo samples collected - skipping save")
 
 # Get validation sample for inquality
-df = pd.read_parquet('data/database/lancet_europe_health_subset_with_dummies.parquet')
+df = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet')
 
 # Take stratified sample for inequality validation
 print("\n" + "="*60)

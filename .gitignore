@@ -1,6 +1,8 @@
 data_backup/
 code_backup/
 .DS_Store
+data/articles/
+.claude/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
