@@ -49,7 +49,7 @@ climate-health-news/
 │   ├── articles/            # Main datasets (parquet & jsonl)
 │   ├── europe_shapefile/    # Geographic data for mapping
 │   ├── sources/             # News source configuration
-│   └── *.json              # Translation files for multi-language analysis
+│   └── translations/        # Multi-language keyword translations
 ├── newsapi/                 # 🔍 Data collection (reference implementation)
 │   ├── collect_articles_example.py  # How data was collected
 │   ├── newsapi_collect_batch.py     # Collection functionality  
