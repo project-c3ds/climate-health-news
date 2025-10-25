@@ -9,7 +9,7 @@ df = pd.read_parquet('data/articles/lancet_europe_dataset_with_dummies.parquet')
 
 df_predictions = df[['uri', 'health', 'urban_rural_framing']]
 
-df_validation = pd.read_csv('data/samples/lancet_validation_health_urban_rural.csv')
+df_validation = pd.read_csv('data/validation/lancet_validation_health_urban_rural.csv')
 
 df_combined = pd.merge(df_validation, df_predictions, on='uri', how='left')
 
@@ -202,7 +202,7 @@ urban_rural_metrics = print_multilabel_performance(
 )
 
 # Examine validation of inquality 
-df_inequality = pd.read_csv('data/samples/lancet_validation_inequality.csv')
+df_inequality = pd.read_csv('data/validation/lancet_validation_inequality.csv')
 
 df_predictions = pd.read_parquet('data/articles/lancet_europe_health_subset_with_dummies.parquet')[['uri', 'inequality']]
 
